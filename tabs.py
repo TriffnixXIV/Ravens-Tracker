@@ -54,7 +54,9 @@ class Tabs(tk.Frame):
 
     def add_tab(self, title: str, widget: tk.Widget):
         label = self.TabLabel(self.tab_count, self, **self.inactive_configure, text=title)
-        label.grid(row=0, column=self.tab_count, padx=0, sticky="nswe")
+        label.bind("<Enter>", lambda _: label.configure(**self.active_configure))
+        label.bind("<Leave>", lambda _: label.configure(**self.inactive_configure))
+        label.grid(row=0, column=self.tab_count, padx=(0, 5), sticky="nswe")
 
         self.widgets.append(widget)
         self.labels.append(label)
@@ -65,10 +67,16 @@ class Tabs(tk.Frame):
 
     def set_tab(self, index: int):
         self.widgets[self.index].grid_forget()
-        self.labels[self.index].configure(**self.inactive_configure)
+        old_label = self.labels[self.index]
+        old_label.configure(**self.inactive_configure)
+        old_label.bind("<Leave>", lambda _: old_label.configure(**self.inactive_configure))
+
         self.index = index
+
         self.widgets[self.index].grid(row=2, column=0, **self.content_grid_options)
-        self.labels[self.index].configure(**self.active_configure)
+        current_label = self.labels[self.index]
+        current_label.configure(**self.active_configure)
+        current_label.unbind("<Leave>")
 
 def main():
     root = tk.Tk()
